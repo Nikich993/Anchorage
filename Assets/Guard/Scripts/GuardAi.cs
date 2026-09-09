@@ -5,25 +5,25 @@ using UnityEngine.UIElements;
 public class GuardAi : MonoBehaviour
 {
 
-    public Transform[] patrolPoints; 
-    public float dayRadius = 10f;    
-    public float nightRadius = 8f;   
-    public float nightAngle = 45f;   
-    public bool isNight = false;    
+    public Transform[] patrolPoints; // точки патруля
+    public float dayRadius = 10f;    // радиус днём
+    public float nightRadius = 8f;   // радиус ночью
+    public float nightAngle = 45f;   // угол ночью
+    public bool isNight = false;    // день/ночь
     bool forward = true;
 
-    NavMeshAgent agent;              
-    Transform player;                
-    int currentPoint = 0;            
-    bool chasing = false;            
-    Vector3 lastKnownPos;            
+    NavMeshAgent agent;              // агент
+    Transform player;                // игрок
+    int currentPoint = 0;            // текущая точка
+    bool chasing = false;            // погоня
+    Vector3 lastKnownPos;            // последняя позиция игрока
 
     void Start()
     {
-        agent = GetComponent<NavMeshAgent>();
-        player = GameObject.FindGameObjectWithTag("Player").transform; 
+        agent = GetComponent<NavMeshAgent>(); // берём агент
+        player = GameObject.FindGameObjectWithTag("Player").transform; // ищем игрока
 
-        agent.destination = patrolPoints[currentPoint].position; 
+        agent.destination = patrolPoints[currentPoint].position; // идём к первой точке
     }
 
     void Update()
@@ -33,16 +33,16 @@ public class GuardAi : MonoBehaviour
             Vector3 dir = player.position - transform.position;
             dir.y = 0;
 
-            transform.forward = dir.normalized; 
+            transform.forward = dir.normalized; // сразу смотрит на игрока
         }
 
         if (!chasing)
         {
-            Patrol(); 
+            Patrol(); // если не гонится — патрулирует
         }
 
-        DetectPlayer(); 
-        Chase();        
+        DetectPlayer(); // проверяем игрока
+        Chase();        // если гонится — идёт за игроком
     }
 
     void Patrol()
@@ -54,14 +54,14 @@ public class GuardAi : MonoBehaviour
                 currentPoint++;
 
                 if (currentPoint >= patrolPoints.Length - 1)
-                    forward = false; 
+                    forward = false; // дошли до конца — идём назад
             }
             else
             {
                 currentPoint--;
 
                 if (currentPoint <= 0)
-                    forward = true; 
+                    forward = true; // дошли до начала — идём вперёд
             }
 
             agent.destination = patrolPoints[currentPoint].position;
@@ -72,7 +72,7 @@ public class GuardAi : MonoBehaviour
     {
         float dist = Vector3.Distance(transform.position, player.position);
 
-        
+        // ДЕНЬ — просто радиус
         if (!isNight)
         {
             if (dist < dayRadius && HasLineOfSight())
@@ -83,7 +83,7 @@ public class GuardAi : MonoBehaviour
             return;
         }
 
-        
+        // НОЧЬ — радиус + угол
         if (dist < nightRadius)
         {
             Vector3 dir = (player.position - transform.position).normalized;
